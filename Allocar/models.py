@@ -1,7 +1,7 @@
 # models.py
 from pydantic import BaseModel,Field
 from datetime import datetime
-
+from typing import Optional
 
 class employee(BaseModel):
     id: int = Field(gt=0)
@@ -23,5 +23,11 @@ class allocation(BaseModel):
 class AllocationRequest(BaseModel):
     employee_id: int = Field(gt=0)
     vehicle_id: int = Field(gt=0)
-
     allocation_date: datetime = Field(description="Date in YYYY-MM-DD format")
+
+
+class AllocationHistoryFilters(BaseModel):
+    employee_id: Optional[int] = Field(None, description="Filter by Employee ID")
+    vehicle_id: Optional[int] = Field(None, description="Filter by Vehicle ID")
+    allocation_date: Optional[datetime] = Field(None, description="Date in YYYY-MM-DD format")
+

@@ -1,7 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException,Query, Depends
+#from typing import List
 from db import get_database
 from models import *
 from datetime import date,datetime
+from typing import List
 
 app = FastAPI()
 db=get_database()
@@ -100,3 +102,33 @@ async def delete_allocation(allocation_id: int):
     await db["allocations"].delete_one({"id": allocation_id})
 
     return {"message": "Allocation deleted successfully"}
+
+
+@app.get("/allocation_history/", response_model=List[allocation])
+async def get_allocation_history(filters: AllocationHistoryFilters = Depends()):
+    query_filters = {}
+
+    if filters.employee_id is not None:
+        query_filters["employee_id"] = filters.employee_id
+    
+    if filters.vehicle_id is not None:
+        query_filters["vehicle_id"] = filters.vehicle_id
+
+    if filters.allocation_date:
+        # If allocation_date is provided, filter for that specific date
+        allocation_date = filters.allocation_date.replace(tzinfo=None)  # Remove timezone info if needed
+        start_of_day = allocation_date.replace(hour=0, minute=0, second=0)
+        end_of_day = allocation_date.replace(hour=23, minute=59, second=59)
+        query_filters["allocation_date"] = {"$gte": start_of_day, "$lte": end_of_day}  # Filter for the full day
+
+    allocation_cursor = db["allocations"].find(query_filters)
+    allocation_history = await allocation_cursor.to_list(length=None)  # Get all allocations
+
+    response = []
+    for allocation_data in allocation_history:  # Change variable name to allocation_data
+        #allocation_data["allocation_date"] = datetime.fromisoformat(allocation_data["allocation_date"].replace("Z", "+00:00")) if isinstance(allocation_data["allocation_date"], str) else allocation_data["allocation_date"]
+        response.append(allocation(**allocation_data))  # Use the allocation model here
+
+    return response
+
+
