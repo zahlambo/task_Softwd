@@ -1,38 +1,39 @@
 import random
 import motor.motor_asyncio
 import asyncio
+from datetime import datetime, timedelta
 
-#initialize the MongoDB client
+# Initialize the MongoDB client
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://localhost:27017")
-db = client["Allocar" ]
+db = client["Allocar"]
 emp_collection = db["employees"]
 veh_collection = db["vehicles"]
-#alloc_collection = db["allocations"]
+alloc_collection = db["allocations"]  # Uncommenting the allocations collection
 
 async def generate_random_name():
-    first_name = random.choice(["John", "Jane", "Michael", "Emily", "Robert", "Maria", "David", "Linda", "Thomas", "Patricia","Shadman","James"])
-    last_name = random.choice(["Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis", "Garcia", "Rodriguez", "Wilson","Saif","Khan"])
-
+    first_name = random.choice(["John", "Jane", "Michael", "Emily", "Robert", "Maria", "David", "Linda", "Thomas", "Patricia", "Shadman", "James"])
+    last_name = random.choice(["Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis", "Garcia", "Rodriguez", "Wilson", "Saif", "Khan"])
     return f"{first_name} {last_name}"
 
 async def generate_random_email(name):
     email_parts = name.replace(" ", ".").lower().split(".")
     username = ".".join(email_parts[:2]) + str(random.randint(100, 999))
     domain = random.choice(["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"])
-
     return f"{username}@{domain}"
 
 async def generate_employee_data(num_employees):
     for i in range(num_employees):
-        id = i + 1
+        employee_id = i + 1
         name = await generate_random_name()
         email = await generate_random_email(name)
+        department = random.choice(["HR", "Finance", "Engineering", "Sales", "Marketing"])  # Added department field
 
         # Create a document to insert
         employee_doc = {
-            "id": id,
+            "employee_id": employee_id,
             "name": name,
-            "email": email
+            "email": email,
+            "department": department
         }
 
         # Insert the document into the collection
@@ -40,13 +41,13 @@ async def generate_employee_data(num_employees):
 
 async def generate_vehicle(num_vehicles):
     for i in range(num_vehicles):
-        id = i + 1
+        vehicle_id = i + 1
         driver_name = await generate_random_name()
         vehicle_model = random.choice(["Toyota", "Nissan", "Ford", "Chevrolet", "Kia", "Hyundai", "Honda", "BMW", "Mercedes-Benz", "Audi"])
-        
+
         # Create a document to insert
         vehicle_doc = {
-            "id": id,
+            "vehicle_id": vehicle_id,
             "driver_name": driver_name,
             "vehicle_model": vehicle_model
         }
@@ -54,13 +55,47 @@ async def generate_vehicle(num_vehicles):
         # Insert the document into the collection
         await veh_collection.insert_one(vehicle_doc)
 
+
+async def is_vehicle_allocated(vehicle_id: int, allocation_date: datetime, exclude_allocation_id: int = None):
+    query = {
+        "vehicle_id": vehicle_id,
+        "allocation_date": allocation_date
+    }
+    if exclude_allocation_id:
+        query["allocation_id"] = {"$ne": exclude_allocation_id}  # Ensure this matches your allocation document structure
+    return await db["allocations"].find_one(query)  # Await the database call
+
+
+async def generate_allocation(num_allocations):
+    employees = await emp_collection.find().to_list(length=None)
+    vehicles = await veh_collection.find().to_list(length=None)
+
+    for _ in range(num_allocations):
+        employee = random.choice(employees)
+        vehicle = random.choice(vehicles)
+        # Generate a random allocation date
+        allocation_date = datetime.now() + timedelta(days=random.randint(1, 30))  # Use datetime instead of date
+
+
+        previous_allocation = await is_vehicle_allocated(vehicle["vehicle_id"], allocation_date)
+        if previous_allocation:  
+            print(f"Vehicle {vehicle['vehicle_id']} already allocated on {allocation_date}")
+            continue
+
+        allocation_doc = {
+            "allocation_id": _ + 1,  # Use the loop index as the allocation ID
+            "employee_id": employee["employee_id"],
+            "vehicle_id": vehicle["vehicle_id"],
+            "allocation_date": allocation_date 
+        }
+        await alloc_collection.insert_one(allocation_doc)
+
 # Run the async function
 async def main():
     await generate_employee_data(1000)
-    print("Inserted 1000 employee records.")
-    await generate_vehicle(1000)
-    print("Inserted 1000 vehicle records.")
+    await generate_vehicle(100)
+    await generate_allocation(100)  # Optional: Generate allocation data
+    print("Inserted records.")
 
-# Start the async event loop
 if __name__ == "__main__":
     asyncio.run(main())

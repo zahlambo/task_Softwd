@@ -1,5 +1,5 @@
 from fastapi import HTTPException, Depends,APIRouter
-from Allocar.core.db import get_database
+from core.db import get_database
 from models import *
 from datetime import date
 from typing import List
@@ -10,7 +10,7 @@ router = APIRouter()
 db=get_database()
 
 
-@router.post("/allocate_vehicle/", response_model=allocation)
+@router.post("/allocate_vehicle/", response_model=allocation,summary="Allocate a vehicle to an employee")
 async def allocate_vehicle(request: AllocationRequest = Depends()):
 
     employee = await get_employee(request.employee_id)
@@ -25,11 +25,11 @@ async def allocate_vehicle(request: AllocationRequest = Depends()):
     if allocation_exists:
         raise HTTPException(status_code=400, detail="Vehicle already allocated for the selected date.")
 
-    last_allocation = await db["allocations"].find_one(sort=[("id", -1)])
-    new_id = last_allocation["id"] + 1 if last_allocation else 1
+    last_allocation = await db["allocations"].find_one(sort=[("allocation_id", -1)])
+    new_id = last_allocation["allocation_id"] + 1 if last_allocation else 1
 
     allocation_doc = allocation(
-        id=new_id,
+        allocation_id=new_id,
         employee_id=request.employee_id,
         vehicle_id=request.vehicle_id,
         allocation_date=request.allocation_date
@@ -40,8 +40,7 @@ async def allocate_vehicle(request: AllocationRequest = Depends()):
     return allocation_doc
 
 
-
-@router.put("/update_allocation/{allocation_id}", response_model=allocation)
+@router.put("/update_allocation/{allocation_id}", response_model=allocation,summary="Update an existing vehicle allocation")
 async def update_allocation(allocation_id: int, request: AllocationRequest = Depends()):
 
     existing_allocation = await get_allocation_by_id(allocation_id)
@@ -70,7 +69,7 @@ async def update_allocation(allocation_id: int, request: AllocationRequest = Dep
 
 
 
-@router.delete("/delete_allocation/{allocation_id}")
+@router.delete("/delete_allocation/{allocation_id}",summary="Delete a vehicle allocation")
 async def delete_allocation(allocation_id: int):
 
     allocation = await get_allocation_by_id(allocation_id)
@@ -86,7 +85,7 @@ async def delete_allocation(allocation_id: int):
 
 
 
-@router.get("/allocation_history/", response_model=List[allocation_response])
+@router.get("/allocation_history/", response_model=List[allocation],summary="Get allocation history")
 async def get_allocation_history(filters: AllocationHistoryFilters = Depends()):
     query_filters = {}
     # dynamic query filters based on request parameters
@@ -111,6 +110,3 @@ async def get_allocation_history(filters: AllocationHistoryFilters = Depends()):
 
     allocation_history = await db["allocations"].find(query_filters).to_list(length=None)
     return [allocation(**allocation_data) for allocation_data in allocation_history]
-
-
-
