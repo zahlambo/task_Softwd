@@ -46,8 +46,11 @@ python gendata.py
 ## API Endpoints
 
 **POST /allocate_vehicle/:** Allocate a vehicle to an employee for a specific date.
+
 **PUT /update_allocation/{allocation_id}:** Update an existing vehicle allocation before the allocation date.
+
 **DELETE /delete_allocation/{allocation_id}:** Delete a vehicle allocation, but only if the allocation date is in the future.
+
 **GET /allocation_history/:** View the history of vehicle allocations with filters such as employee ID, vehicle ID, or allocation date.
 
 ## Swagger Documentation
