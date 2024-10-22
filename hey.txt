@@ -1,0 +1,42 @@
+/my_fastapi_project
+│
+├── .env                 # Environment variables (e.g., database credentials)
+├── .gitignore           # Git ignore file
+├── README.md            # Project documentation
+├── requirements.txt     # Python dependencies
+├── alembic/             # (Optional) If using database migrations (e.g., Alembic)
+├── app/                 # Main application folder
+│   ├── __init__.py      # Makes this a Python package
+│   ├── main.py          # Entry point of the FastAPI app
+│   ├── api/             # Folder for API routes
+│   │   ├── __init__.py  # Import routes here
+│   │   ├── v1/          # Versioned APIs (v1, v2...)
+│   │       ├── __init__.py  
+│   │       ├── routes.py # API route definitions
+│   ├── core/            # Core configurations (settings, security, etc.)
+│   │   ├── __init__.py
+│   │   ├── config.py    # Settings configuration (loading env variables)
+│   ├── crud/            # CRUD operations for the database
+│   │   ├── __init__.py
+│   │   ├── allocation.py # CRUD logic for vehicle allocation
+│   ├── db/              # Database-related files
+│   │   ├── __init__.py
+│   │   ├── db.py        # MongoDB client and get_database function
+│   ├── models/          # Pydantic models
+│   │   ├── __init__.py
+│   │   ├── employee.py  # Employee model
+│   │   ├── vehicle.py   # Vehicle model
+│   │   ├── allocation.py # Allocation model
+│   ├── schemas/         # Pydantic schemas (for request/response validation)
+│   │   ├── __init__.py
+│   │   ├── employee.py  # Employee schemas
+│   │   ├── vehicle.py   # Vehicle schemas
+│   │   ├── allocation.py # Allocation schemas
+│   ├── services/        # Additional business logic, services, and helper functions
+│   │   ├── __init__.py
+│   │   ├── allocation_service.py # Service for allocation-related logic
+│   ├── tests/           # Unit and integration tests
+│       ├── __init__.py
+│       ├── test_main.py # Tests for the FastAPI app
+│       ├── test_crud.py # Tests for CRUD operations
+└── alembic.ini          # Alembic configuration (if using migrations)

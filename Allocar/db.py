@@ -1,8 +1,15 @@
-# db.py
+import os
 from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
 
-client = AsyncIOMotorClient("mongodb://localhost:27017")
-db = client["Allocar"]
+load_dotenv()
+
+# Get MongoDB credentials from environment variables
+MONGO_URI = os.getenv("MONGO_URI")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME")
+
+client = AsyncIOMotorClient(MONGO_URI)
+db = client[MONGO_DB_NAME]
 
 def get_database():
     return db
