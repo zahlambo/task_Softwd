@@ -1,9 +1,6 @@
-from fastapi import FastAPI, HTTPException,Query, Depends
-#from typing import List
-from db import get_database
+from fastapi import FastAPI
+from Allocar.core.db import get_database
 from models import *
-from datetime import date,datetime
-from typing import List
 from routers import allocar
 
 app = FastAPI()
