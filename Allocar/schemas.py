@@ -7,11 +7,14 @@ class employee(BaseModel):
     name: str = Field(min_length=3, max_length=30,description="Name of the employee, must be between 3 and 30 characters.")
     email: EmailStr = Field(min_length=7, max_length=50,description="Valid email address of the employee, unique and between 7 and 50 characters.")
     department: str = Field(min_length=2, max_length=30,description="Department the employee belongs to, must be between 2 and 30 characters.")
+    date_joined: datetime = Field(default_factory=datetime.utcnow, description="Date the employee joined the company.")
+
 
 class vehicle(BaseModel):
     vehicle_id: Optional[int] = Field(None, gt=0,description="Unique identifier for the vehicle, must be a positive integer.")
     driver_name: str = Field(min_length=3, max_length=30,description="Name of the driver assigned to the vehicle, must be between 3 and 30 characters.")
     vehicle_model: str = Field(min_length=2, max_length=30,description="Model of the vehicle, must be between 2 and 30 characters.")
+    license_plate: str = Field(min_length=10, max_length=30,description="License plate of the vehicle, must be between 10 and 30 characters.")
 
 class allocation(BaseModel):
     allocation_id: int = Field(gt=0,description="Unique identifier for the allocation, must be a positive integer.")

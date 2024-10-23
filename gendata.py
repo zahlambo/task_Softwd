@@ -3,6 +3,7 @@ import motor.motor_asyncio
 import asyncio
 from datetime import datetime, timedelta,date
 from pymongo.errors import DuplicateKeyError
+import string
 
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://localhost:27017")
 db = client["Allocar"]
@@ -21,31 +22,39 @@ async def generate_random_email(name):
     domain = random.choice(["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"])
     return f"{username}@{domain}"
 
+def generate_license_plate(length=random.randint(10, 30)):
+    characters = string.ascii_letters + string.digits
+    license_plate = ''.join(random.choice(characters) for _ in range(length))
+    return license_plate
+
+def generate_random_date():
+    delta = datetime.now() - date(2020, 1, 1) 
+    random_days = random.randint(0, delta.days)
+    return date(2020, 1, 1)  + timedelta(days=random_days)
+
 async def generate_employee_data(num_employees):
     for i in range(num_employees):
         employee_id = i + 1
         name = await generate_random_name()
         department = random.choice(["HR", "Finance", "Engineering", "Sales", "Marketing"])
+        date_joined = generate_random_date()
 
-        # Retry mechanism for unique email generation
         while True:
             try:
                 email = await generate_random_email(name)
 
-                # Create a document to insert
                 employee_doc = {
                     "employee_id": employee_id,
                     "name": name,
                     "email": email,
-                    "department": department
+                    "department": department,
+                    "date_joined": date_joined
                 }
 
-                # Insert the document into the collection
                 await emp_collection.insert_one(employee_doc)
-                break  # Break out of the loop if successful
+                break  
 
             except DuplicateKeyError:
-                # If a duplicate email is found, generate a new one and retry
                 continue
 
 async def generate_vehicle(num_vehicles):
@@ -53,15 +62,16 @@ async def generate_vehicle(num_vehicles):
         vehicle_id = i + 1
         driver_name = await generate_random_name()
         vehicle_model = random.choice(["Toyota", "Nissan", "Ford", "Chevrolet", "Kia", "Hyundai", "Honda", "BMW", "Mercedes-Benz", "Audi"])
+        license_plate = generate_license_plate()
 
         # Create a document to insert
         vehicle_doc = {
             "vehicle_id": vehicle_id,
             "driver_name": driver_name,
-            "vehicle_model": vehicle_model
+            "vehicle_model": vehicle_model,
+            "license_plate":license_plate
         }
 
-        # Insert the document into the collection
         await veh_collection.insert_one(vehicle_doc)
 
 
@@ -102,10 +112,12 @@ async def generate_allocation(num_allocations):
 
 # Run the async function
 async def main():
+    await emp_collection.create_index("email", unique=True)
     await generate_employee_data(1000)
-    await generate_vehicle(100)
-    await generate_allocation(100)  
+    await generate_vehicle(1000)
+    await generate_allocation(1000)  
     print("Inserted records.")
 
 if __name__ == "__main__":
+    
     asyncio.run(main())
