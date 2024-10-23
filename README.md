@@ -4,7 +4,7 @@ This project is a FastAPI-based vehicle allocation system for a company's employ
 
 ## Installation
 
-To set up this project, you need Python 3.8 to 3.12 installed on your machine, as well as MongoDB. Follow the instructions below:
+To set up this project, you need Python 3.8 to 3.12 installed on your machine, as well as MongoDB. Follow the instructions below:<br>
 Use winget to download python and mongodb or you can use their respective site to download them
 ```
 winget install Python.Python.3.12 MongoDB.Server MongoDB.Compass.Full  
