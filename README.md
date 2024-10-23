@@ -10,7 +10,6 @@ To set up this project, you need Python 3.8+ installed on your machine, as well 
 
 ```bash
 git clone https://github.com/zahlambo/task_Softwd
-cd allocar
 ```
 
 ## Install dependencies
@@ -25,16 +24,14 @@ pip install -r requirements.txt
 Create a .env file in the project root directory. This file should contain the environment variables needed for database connections. For example:
 
 ```
-MONGO_URL=mongodb://localhost:27017
+MONGO_URL=mongodb://localhost:27017  # Or your URI
 MONGO_DB_NAME=Allocar
 ```
 ## Running the Project
 To run the FastAPI application, use the following command:
 
 ```
-fastapi run main
-or 
-uvicorn main:app --reload
+fastapi run Allocar/main.py
 ```
 ## Generating Data
 To populate your MongoDB database with sample employee and vehicle data, use the gendata.py script. 
@@ -45,17 +42,35 @@ python gendata.py
 
 ## API Endpoints
 
-**POST /allocate_vehicle/:** Allocate a vehicle to an employee for a specific date.
+### POST /add_employee
+**Description:** Adds a new employee to the system.
 
-**PUT /update_allocation/{allocation_id}:** Update an existing vehicle allocation before the allocation date.
+### POST /add_vehicle
+**Description:** Adds a new vehicle to the system.
 
-**DELETE /delete_allocation/{allocation_id}:** Delete a vehicle allocation, but only if the allocation date is in the future.
+### POST /allocate_vehicle
+**Description:** Allocates a vehicle to an employee for a specific date.
 
-**GET /allocation_history/:** View the history of vehicle allocations with filters such as employee ID, vehicle ID, or allocation date.
+### PUT /update_allocation/{allocation_id}
+**Description:** Updates a vehicle allocation of a specific allocation.
+
+### DELETE /delete_allocation/{allocation_id}
+**Description:** Deletes an existing vehicle allocation if the allocation date is in the future.
+
+### GET /allocation_history
+**Description:** Retrieves a history of all vehicle allocations, with filters as needed
+
+### POST /vehicle_availability
+**Description:** Checks if a vehicle is available for allocation on a specific date.
+
+### GET /employee/allocation_stats
+**Description:** Genarate allocation stats by year,month or whole. 
+
+
 
 ## Swagger Documentation
 
-FastAPI automatically generates Swagger documentation for your API, which can be accessed at:
+FastAPI automatically generates Swagger documentation for API, which can be accessed at:
 
 ```
 http://127.0.0.1:8000/docs

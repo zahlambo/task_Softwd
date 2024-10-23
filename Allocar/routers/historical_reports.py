@@ -35,8 +35,8 @@ async def get_allocation_history(filters: AllocationHistoryFilters = Depends()):
     return [allocation(**allocation_data) for allocation_data in allocation_history]
 
 
-@router.post("/vehicle_availability")
-async def vehicle_availability(data: check_vehicle_availability):
+@router.post("/vehicle_availability",summary="Check vehicle availability")
+async def vehicle_availability(data: CheckVehicleAvailability):
 
     if not data.end_date:
         data.end_date = data.start_date
@@ -59,37 +59,35 @@ async def vehicle_availability(data: check_vehicle_availability):
 
     return {"available": True}
 
-@router.get("/employee/allocations/{employee_id}/", response_model=List[allocation], summary="Get employee allocations")
-async def get_employee_allocations(employee_id: int):
-
-    employee_allocations = await db["allocations"].find({"employee_id": employee_id}).to_list(length=None)
-
-    if not employee_allocations:
-        raise HTTPException(status_code=404, detail="No allocations found for this employee")
-
-    return employee_allocations
-
-@router.get("/vehicle/allocations/{vehicle_id}/", response_model=List[allocation], summary="Get vehicle allocations")   
-async def get_vehicle_allocations(vehicle_id: int):
-
-    vehicle_allocations = await db["allocations"].find({"vehicle_id": vehicle_id}).to_list(length=None)
-
-    if not vehicle_allocations:
-        raise HTTPException(status_code=404, detail="No allocations found for this vehicle")
-
-    return vehicle_allocations
-
 @router.get('/employee/allocation_stats')
-async def get_employee_allocation_stats():
-    pipeline = [
-        {
-            "$group": {
-                "_id": "$employee_id",
-                "total_allocations": {"$sum": 1}
-            }
+async def get_employee_allocation_stats(filters: AllocationStatsFilter = Depends()):
+    match_stage = {}
+    
+    # Add year filter if provided
+    if filters.year:
+        match_stage["$expr"] = {"$eq": [{"$year": "$allocation_date"}, filters.year]}
+    
+    # Add month filter if provided
+    if filters.month:
+        match_stage["$expr"] = {
+            "$and": [
+                match_stage.get("$expr", {"$eq": [1, 1]}),  # Default to True if no year filter
+                {"$eq": [{"$month": "$allocation_date"}, filters.month]}
+            ]
         }
-    ]
+    pipeline = []
+
+    if match_stage:
+        pipeline.append({"$match": match_stage})
+
+    pipeline.append({
+        "$group": {
+            "_id": "$employee_id",
+            "total_allocations": {"$sum": 1}
+        }
+    })
 
     allocation_stats = await db["allocations"].aggregate(pipeline).to_list(None)
+    
     return allocation_stats
 

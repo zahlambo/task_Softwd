@@ -11,7 +11,7 @@ from pymongo.errors import DuplicateKeyError
 router = APIRouter()
 
 @router.post('/add_employee/', response_model=employee, summary="Add a new employee")
-async def add_employee(employee: Employee):
+async def add_employee(employee: AddEmployee):
 
     last_employee = await db["employees"].find_one(sort=[("employee_id", -1)])
     new_id = last_employee["employee_id"] + 1 if last_employee else 1
@@ -28,3 +28,22 @@ async def add_employee(employee: Employee):
     except DuplicateKeyError:
         raise HTTPException(status_code=400, detail="Email already exists")
     return employee_doc
+
+
+@router.post('/add_vehicle/', response_model=vehicle, summary="Add a new vehicle")
+async def add_vehicle(vehicle: AddVehicle):
+
+    last_vehicle = await db["vehicles"].find_one(sort=[("vehicle_id", -1)])
+    new_id = last_vehicle["vehicle_id"] + 1 if last_vehicle else 1
+
+    vehicle_doc=Vehicle(
+        vehicle_id=new_id,
+        driver_name=vehicle.driver_name,
+        vehicle_model=vehicle.vehicle_model
+    )
+
+    try:
+        await db['vehicles'].insert_one(vehicle_doc.model_dump())
+    except DuplicateKeyError:
+        raise HTTPException(status_code=400, detail="Vehicle already exists")
+    return vehicle_doc
