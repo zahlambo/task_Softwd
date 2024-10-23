@@ -1,14 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from core.db import get_database
 from models import *
-from datetime import date
-from typing import List
+
 from utils.db_utils import *
 from schemas import *
 from pymongo.errors import DuplicateKeyError
 
-
 router = APIRouter()
+db=get_database()
 
 @router.post('/add_employee/', response_model=employee, summary="Add a new employee")
 async def add_employee(employee: AddEmployee):
