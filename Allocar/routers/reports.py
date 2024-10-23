@@ -7,6 +7,7 @@ from utils.db_utils import *
 from schemas import *
 
 router = APIRouter()
+db = get_database()
 
 @router.get("/allocation_history/", response_model=List[allocation],summary="Get allocation history")
 async def get_allocation_history(filters: AllocationHistoryFilters = Depends()):
@@ -36,14 +37,14 @@ async def get_allocation_history(filters: AllocationHistoryFilters = Depends()):
 
 
 @router.post("/vehicle_availability",summary="Check vehicle availability")
-async def vehicle_availability(data: CheckVehicleAvailability):
+async def vehicle_availability(data: CheckVehicleAvailability=Depends()):
 
     if not data.end_date:
         data.end_date = data.start_date
     
     #User input is in date format, but we need to convert it to datetime format
-    start_of_day = datetime.combine(data.start_date, datetime.min.time())  # 00:00:00 on the start date
-    end_of_day = datetime.combine(data.end_date, datetime.max.time())      # 23:59:59 on the end date
+    start_of_day = datetime.combine(data.start_date, datetime.min.time())  
+    end_of_day = datetime.combine(data.end_date, datetime.max.time()) 
 
 
     conflicting_allocation = await db['allocations'].find_one({
@@ -86,7 +87,6 @@ async def get_employee_allocation_stats(filters: AllocationStatsFilter = Depends
             "total_allocations": {"$sum": 1}
         }
     })
-
     allocation_stats = await db["allocations"].aggregate(pipeline).to_list(None)
     
     return allocation_stats

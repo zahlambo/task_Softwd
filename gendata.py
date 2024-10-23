@@ -2,7 +2,7 @@ import random
 import motor.motor_asyncio
 import asyncio
 from datetime import datetime, timedelta,date
-
+from pymongo.errors import DuplicateKeyError
 
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://localhost:27017")
 db = client["Allocar"]
@@ -25,19 +25,28 @@ async def generate_employee_data(num_employees):
     for i in range(num_employees):
         employee_id = i + 1
         name = await generate_random_name()
-        email = await generate_random_email(name)
-        department = random.choice(["HR", "Finance", "Engineering", "Sales", "Marketing"])  # Added department field
+        department = random.choice(["HR", "Finance", "Engineering", "Sales", "Marketing"])
 
-        # Create a document to insert
-        employee_doc = {
-            "employee_id": employee_id,
-            "name": name,
-            "email": email,
-            "department": department
-        }
+        # Retry mechanism for unique email generation
+        while True:
+            try:
+                email = await generate_random_email(name)
 
-        # Insert the document into the collection
-        await emp_collection.insert_one(employee_doc)
+                # Create a document to insert
+                employee_doc = {
+                    "employee_id": employee_id,
+                    "name": name,
+                    "email": email,
+                    "department": department
+                }
+
+                # Insert the document into the collection
+                await emp_collection.insert_one(employee_doc)
+                break  # Break out of the loop if successful
+
+            except DuplicateKeyError:
+                # If a duplicate email is found, generate a new one and retry
+                continue
 
 async def generate_vehicle(num_vehicles):
     for i in range(num_vehicles):
