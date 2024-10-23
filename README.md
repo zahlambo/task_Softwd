@@ -33,10 +33,11 @@ MONGO_URL=mongodb://localhost:27017  # Or your URI
 MONGO_DB_NAME=Allocar
 ```
 ## Running the Project
-To run the FastAPI application, use the following command:
+To run the FastAPI application, use the following command:  <br>
+change port if necessary.
 
 ```
-fastapi run Allocar/main.py
+fastapi run Allocar/main.py --host localhost --port 8000
 ```
 ## Generating Data
 To populate your MongoDB database with sample employee and vehicle data, use the gendata.py script. 
