@@ -1,14 +1,14 @@
 import random
 import motor.motor_asyncio
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,date
 
-# Initialize the MongoDB client
+
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://localhost:27017")
 db = client["Allocar"]
 emp_collection = db["employees"]
 veh_collection = db["vehicles"]
-alloc_collection = db["allocations"]  # Uncommenting the allocations collection
+alloc_collection = db["allocations"]  
 
 async def generate_random_name():
     first_name = random.choice(["John", "Jane", "Michael", "Emily", "Robert", "Maria", "David", "Linda", "Thomas", "Patricia", "Shadman", "James"])
@@ -74,7 +74,8 @@ async def generate_allocation(num_allocations):
         employee = random.choice(employees)
         vehicle = random.choice(vehicles)
         # Generate a random allocation date
-        allocation_date = datetime.now() + timedelta(days=random.randint(1, 30))  # Use datetime instead of date
+        allocation_date = datetime.now() + timedelta(days=random.randint(date.today().day, 30))  # Use datetime instead of date
+        
 
 
         previous_allocation = await is_vehicle_allocated(vehicle["vehicle_id"], allocation_date)
@@ -94,7 +95,7 @@ async def generate_allocation(num_allocations):
 async def main():
     await generate_employee_data(1000)
     await generate_vehicle(100)
-    await generate_allocation(100)  # Optional: Generate allocation data
+    await generate_allocation(100)  
     print("Inserted records.")
 
 if __name__ == "__main__":

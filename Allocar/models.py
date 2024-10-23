@@ -13,6 +13,11 @@ class Vehicle(BaseModel):
     driver_name: str = Field(min_length=3, max_length=30)
     vehicle_model: str = Field(min_length=2, max_length=30)
 
+class check_vehicle_availability (BaseModel):
+    vehicle_id: int = Field(gt=0)
+    start_date: datetime = Field(description="Date in YYYY-MM-DD format, including time if applicable")
+    end_date: Optional[datetime] = Field(None, description="Date in YYYY-MM-DD format, including time if applicable")
+
 class Allocation(BaseModel):
     allocation_id: int = Field(gt=0)
     employee_id: int = Field(gt=0)

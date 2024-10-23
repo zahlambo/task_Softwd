@@ -85,28 +85,28 @@ async def delete_allocation(allocation_id: int):
 
 
 
-@router.get("/allocation_history/", response_model=List[allocation],summary="Get allocation history")
-async def get_allocation_history(filters: AllocationHistoryFilters = Depends()):
-    query_filters = {}
-    # dynamic query filters based on request parameters
-    if filters.allocation_id:
-        query_filters["id"] = filters.allocation_id
+# @router.get("/allocation_history/", response_model=List[allocation],summary="Get allocation history")
+# async def get_allocation_history(filters: AllocationHistoryFilters = Depends()):
+#     query_filters = {}
+#     # dynamic query filters based on request parameters
+#     if filters.allocation_id:
+#         query_filters["id"] = filters.allocation_id
 
-    if filters.employee_id:
-        query_filters["employee_id"] = filters.employee_id
+#     if filters.employee_id:
+#         query_filters["employee_id"] = filters.employee_id
 
-    if filters.vehicle_id:
-        query_filters["vehicle_id"] = filters.vehicle_id
+#     if filters.vehicle_id:
+#         query_filters["vehicle_id"] = filters.vehicle_id
 
-    if filters.allocation_date:
-        try:
-            # Normalize the date and filter by day
-            allocation_date = filters.allocation_date.replace(tzinfo=None)
-            start_of_day = allocation_date.replace(hour=0, minute=0, second=0)
-            end_of_day = allocation_date.replace(hour=23, minute=59, second=59)
-            query_filters["allocation_date"] = {"$gte": start_of_day, "$lte": end_of_day}
-        except Exception as e:
-            raise HTTPException(status_code=400, detail="Invalid date format.")
+#     if filters.allocation_date:
+#         try:
+#             # Normalize the date and filter by day
+#             allocation_date = filters.allocation_date.replace(tzinfo=None)
+#             start_of_day = allocation_date.replace(hour=0, minute=0, second=0)
+#             end_of_day = allocation_date.replace(hour=23, minute=59, second=59)
+#             query_filters["allocation_date"] = {"$gte": start_of_day, "$lte": end_of_day}
+#         except Exception as e:
+#             raise HTTPException(status_code=400, detail="Invalid date format.")
 
-    allocation_history = await db["allocations"].find(query_filters).to_list(length=None)
-    return [allocation(**allocation_data) for allocation_data in allocation_history]
+#     allocation_history = await db["allocations"].find(query_filters).to_list(length=None)
+#     return [allocation(**allocation_data) for allocation_data in allocation_history]
