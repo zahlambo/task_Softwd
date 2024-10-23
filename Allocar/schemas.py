@@ -7,7 +7,10 @@ class employee(BaseModel):
     name: str = Field(min_length=3, max_length=30,description="Name of the employee, must be between 3 and 30 characters.")
     email: EmailStr = Field(min_length=7, max_length=50,description="Valid email address of the employee, unique and between 7 and 50 characters.")
     department: str = Field(min_length=2, max_length=30,description="Department the employee belongs to, must be between 2 and 30 characters.")
-    date_joined: datetime = Field(default_factory=datetime.utcnow, description="Date the employee joined the company.")
+    date_joined: datetime = Field(description="Date the employee joined the company.")
+class add_employee(employee):
+    pass
+
 
 
 class vehicle(BaseModel):

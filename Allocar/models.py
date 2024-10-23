@@ -14,7 +14,7 @@ class AddEmployee(BaseModel):
     name: str = Field(min_length=3, max_length=30, description="Name of the employee to be added, between 3 and 30 characters.")
     email: EmailStr = Field(min_length=7, max_length=50, description="Valid email address for the new employee, between 7 and 50 characters.")
     department: str = Field(min_length=2, max_length=30, description="Department for the new employee, must be between 2 and 30 characters.")
-    date_joined: datetime = Field(default_factory=datetime, description="Date the employee joined the company.")
+    #date_joined: datetime = Field(description="Date the employee joined the company.")
 
 class Vehicle(BaseModel):
     vehicle_id: Optional[int] = Field(None, gt=0, description="Unique identifier for the vehicle, must be a positive integer.")

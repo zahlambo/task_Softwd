@@ -10,23 +10,29 @@ from pymongo.errors import DuplicateKeyError
 router = APIRouter()
 db=get_database()
 
-@router.post('/add_employee/', response_model=employee, summary="Add a new employee")
+@router.post('/add_employee/', response_model=add_employee, summary="Add a new employee")
 async def add_employee(employee: AddEmployee):
+    
+    existing_employee = await db.employees.find_one({"email": employee.email})
+    if existing_employee:
+        raise HTTPException(status_code=400, detail="Email already registered")
 
     last_employee = await db["employees"].find_one(sort=[("employee_id", -1)])
     new_id = last_employee["employee_id"] + 1 if last_employee else 1
 
-    employee_doc=Employee(
+    employee_doc = Employee(
         employee_id=new_id,
         name=employee.name,
         email=employee.email,
-        department=employee.department
+        department=employee.department,
+        date_joined=datetime.now()  # Correctly assign the current datetime
     )
 
     try:
         await db['employees'].insert_one(employee_doc.model_dump())
     except DuplicateKeyError:
         raise HTTPException(status_code=400, detail="Email already exists")
+
     return employee_doc
 
 
